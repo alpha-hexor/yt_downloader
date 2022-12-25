@@ -1,11 +1,13 @@
 from customtkinter import *
 import subprocess as sp
+from parse_output import *
 import re
 
 def show_output(url, resultBox):
     Headers = ["ID", "EXT", "RESOLUTION", "FILESIZE"]
-    result =  sp.run(['yt-dlp', '-F', url],capture_output=True).stdout.decode()
-    results = [item.split() for item in result.strip().replace('-', '').replace('|', '').replace("only", '').split("\n")]
+    result =  sp.run(['yt-dlp','-q','-F', url],capture_output=True).stdout.decode()
+    #results = [item.split() for item in result.strip().replace('-', '').replace('|', '').replace("only", '').split("\n")]
+    ids,ext,res,size,formats = parse(result)
     for i in range(3):
         resultBox.insert(END, " ".join(results[i]))
         resultBox.insert(END, "\n\n")
