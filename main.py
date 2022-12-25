@@ -1,34 +1,40 @@
 from customtkinter import *
 import subprocess as sp
 from parse_output import *
-import re
 
 def show_output(url, resultBox):
-    Headers = ["ID", "EXT", "RESOLUTION", "FILESIZE"]
+    Headers = ["ID", "EXT", "RESOLUTION", "FILESIZE", "FORMAT"]
     result =  sp.run(['yt-dlp','-q','-F', url],capture_output=True).stdout.decode()
-    #results = [item.split() for item in result.strip().replace('-', '').replace('|', '').replace("only", '').split("\n")]
+    results = [item.split() for item in result.strip().replace('-', '').replace('|', '').replace("only", '').split("\n")]
     ids,ext,res,size,formats = parse(result)
+    out = [list(a) for a in zip(ids, ext, res, size, formats)]
     for i in range(3):
         resultBox.insert(END, " ".join(results[i]))
         resultBox.insert(END, "\n\n")
     for item in Headers:
         resultBox.insert(END, item.ljust(30 - len(item)))
-    resultBox.insert(END, "\n"+"_"*60)
-    for i in range(4, len(results)):
-        for j in range(len(results[i])):
-            if j < 3 or "MiB" in results[i][j] or "GiB" in results[i][j]:
-                resultBox.insert(END, results[i][j].ljust(30 - len(results[i][j])))  
-        resultBox.insert(END, "\n\n")
+    resultBox.insert(END, "\n"+"_"*80 + "\n")
+    for row in out:
+        for item in row:
+            resultBox.insert(END, item.ljust(30 - len(item)))
+        resultBox.insert(END, "\n")
         
     resultBox.insert(END, "\n")
     resultBox.see(END)
     """ resultBox.insert(END, result)"""
 
+def run_subprocess(id_string, url):
+    P = sp.Popen(['yt-dlp', '-f', id_string, url])
+
 def download(id_string,url, resultBox):
     # id as string id1,id2,id3 .....
     #replace , with + --> id1+id2+id3
-    id_string.replace(',', '+')
-    P = sp.Popen(['yt-dlp','-f',id_string,url])
+    P = str(sp.check_output(['yt-dlp', '-f', id_string, url])).replace('\n', '').replace('\r', '')
+    P = P.split("[download]")
+    for row in P:
+        resultBox.insert(END, "\n[download]" + row)
+    resultBox.see(END)
+
 
 
 
@@ -61,7 +67,6 @@ resultBox.pack(padx = 5, pady = 5)
 idDialog.pack(padx = 5, pady = 5)
 idEntry.pack(padx = 5, pady = 5)
 downloadButton.pack(padx = 5, pady = 5)
-
 
 
 mainWindow.mainloop()
