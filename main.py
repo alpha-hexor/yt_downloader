@@ -5,12 +5,8 @@ from parse_output import *
 def show_output(url, resultBox):
     Headers = ["ID", "EXT", "RESOLUTION", "FILESIZE", "FORMAT"]
     result =  sp.run(['yt-dlp','-q','-F', url],capture_output=True).stdout.decode()
-    results = [item.split() for item in result.strip().replace('-', '').replace('|', '').replace("only", '').split("\n")]
     ids,ext,res,size,formats = parse(result)
     out = [list(a) for a in zip(ids, ext, res, size, formats)]
-    for i in range(3):
-        resultBox.insert(END, " ".join(results[i]))
-        resultBox.insert(END, "\n\n")
     for item in Headers:
         resultBox.insert(END, item.ljust(30 - len(item)))
     resultBox.insert(END, "\n"+"_"*80 + "\n")
