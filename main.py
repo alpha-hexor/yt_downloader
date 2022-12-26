@@ -35,20 +35,9 @@ def download(id_string,url, resultBox):
     #replace , with + --> id1+id2+id3
     id_string = id_string.replace(" ","").replace(",","+")
     P = sp.Popen(["yt-dlp","--newline", "-f",id_string,url], shell=True, stdout=sp.PIPE)
-    # P = P.split("[download]")
-    # for row in P:
-    #     resultBox.insert(END, "\n[download]" + row)
-    # resultBox.see(END)
-    # while True:
-    #     nextline = P.stdout.readline()
-    #     if nextline == b"":
-    #         break
-    #     resultBox.insert(END,nextline)
-    #     resultBox.see(END)
+ 
     thread = threading.Thread(target=write_output, args=(P,resultBox))
     thread.start()
-    resultBox.insert(END,"[*]Process completed")
-    resultBox.see(END)
 
 
 
