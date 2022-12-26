@@ -1,6 +1,7 @@
 from customtkinter import *
 import subprocess as sp
 from parse_output import *
+import threading
 
 def show_output(url, resultBox):
     Headers = ["ID", "EXT", "RESOLUTION", "FILESIZE", "FORMAT"]
@@ -19,16 +20,34 @@ def show_output(url, resultBox):
     resultBox.see(END)
     """ resultBox.insert(END, result)"""
 
-def run_subprocess(id_string, url):
-    P = sp.Popen(['yt-dlp', '-f', id_string, url])
 
+def write_output(P,resultBox):
+    while True:
+        nextline = P.stdout.readline()
+        if nextline == b"":
+            break
+        resultBox.insert(END,nextline)
+        resultBox.see(END)
+    
+        
 def download(id_string,url, resultBox):
     # id as string id1,id2,id3 .....
     #replace , with + --> id1+id2+id3
-    P = str(sp.check_output(['yt-dlp', '-f', id_string, url])).replace('\n', '').replace('\r', '')
-    P = P.split("[download]")
-    for row in P:
-        resultBox.insert(END, "\n[download]" + row)
+    id_string = id_string.replace(" ","").replace(",","+")
+    P = sp.Popen(["yt-dlp","--newline", "-f",id_string,url], shell=True, stdout=sp.PIPE)
+    # P = P.split("[download]")
+    # for row in P:
+    #     resultBox.insert(END, "\n[download]" + row)
+    # resultBox.see(END)
+    # while True:
+    #     nextline = P.stdout.readline()
+    #     if nextline == b"":
+    #         break
+    #     resultBox.insert(END,nextline)
+    #     resultBox.see(END)
+    thread = threading.Thread(target=write_output, args=(P,resultBox))
+    thread.start()
+    resultBox.insert(END,"[*]Process completed")
     resultBox.see(END)
 
 
